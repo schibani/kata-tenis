@@ -26,9 +26,17 @@ public class Player {
                 actualScore = POINT_40;
                 break;
             case POINT_40:
-                actualScore = WIN;
+                if(deuceIsActivated(opponent.getActualScore())){
+                    actualScore = ADVANTAGE;
+                } else{
+                    actualScore = WIN;
+                }
                 break;
         }
+    }
+
+    private boolean deuceIsActivated(GameScore opponentScore) {
+        return this.actualScore == POINT_40 && opponentScore == POINT_40;
     }
 
     public GameScore getActualScore() {
