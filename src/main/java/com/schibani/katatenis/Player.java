@@ -14,8 +14,8 @@ public class Player {
         this.actualScore = score;
     }
 
-    public void winPointAgainst(Player opponent){
-        switch(actualScore){
+    public void winPointAgainst(Player opponent) {
+        switch (actualScore) {
             case POINT_0:
                 actualScore = POINT_15;
                 break;
@@ -26,17 +26,26 @@ public class Player {
                 actualScore = POINT_40;
                 break;
             case POINT_40:
-                if(deuceIsActivated(opponent.getActualScore())){
+                if (deuceIsActivated(opponent.getActualScore())) {
                     actualScore = ADVANTAGE;
-                } else{
+                } else {
                     actualScore = WIN;
                 }
+                break;
+            case ADVANTAGE:
+                actualScore = WIN;
                 break;
         }
     }
 
     private boolean deuceIsActivated(GameScore opponentScore) {
         return this.actualScore == POINT_40 && opponentScore == POINT_40;
+    }
+
+    public void loosePoint() {
+        if (actualScore == ADVANTAGE) {
+            actualScore = POINT_40;
+        }
     }
 
     public GameScore getActualScore() {
