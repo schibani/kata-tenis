@@ -10,7 +10,8 @@ public class TenisGameRuleTest {
     @Test
     public void winPointAgainst_lastScoreIs0_scoreBecomes15() {
         // given
-        Player federer = new Player(POINT_0);
+        final GameScore actualScorFederer = POINT_0;
+        Player federer = new Player(actualScorFederer);
         Player nadal = new Player();
 
         // when
@@ -23,7 +24,8 @@ public class TenisGameRuleTest {
     @Test
     public void winPointAgainst_scoreIs15_scoreBecomes30() {
         // given
-        Player federer = new Player(POINT_15);
+        final GameScore actualScorFederer = POINT_15;
+        Player federer = new Player(actualScorFederer);
         Player nadal = new Player();
 
         // when
@@ -36,7 +38,8 @@ public class TenisGameRuleTest {
     @Test
     public void winPointAgainst_scoreIs30_scoreBecomes40() {
         // given
-        Player federer = new Player(POINT_30);
+        final GameScore actualScorFederer = POINT_30;
+        Player federer = new Player(actualScorFederer);
         Player nadal = new Player();
 
         // when
@@ -49,8 +52,10 @@ public class TenisGameRuleTest {
     @Test
     public void winPointAgainst_scoreIs40AndnadalScoreNot40_gameWinned() {
         // given
-        Player federer = new Player(POINT_40);
-        Player nadal = new Player(POINT_30);
+        final GameScore actualScorFederer = POINT_40;
+        final GameScore actualScoreNadal = POINT_30;
+        Player federer = new Player(actualScorFederer);
+        Player nadal = new Player(actualScoreNadal);
 
         // when
         federer.winPointAgainst(nadal);
@@ -62,8 +67,10 @@ public class TenisGameRuleTest {
     @Test
     public void winPointAgainst_deuce_scoreBecomesAdvantage() {
         // given
-        Player federer = new Player(POINT_40);
-        Player nadal = new Player(POINT_40);
+        final GameScore actualScorFederer = POINT_40;
+        final GameScore actualScoreNadal = POINT_40;
+        Player federer = new Player(actualScorFederer);
+        Player nadal = new Player(actualScoreNadal);
 
         // when
         federer.winPointAgainst(nadal);
@@ -75,7 +82,8 @@ public class TenisGameRuleTest {
     @Test
     public void winPointAgainst_advantage_gameWinned() {
         // given
-        Player federer = new Player(ADVANTAGE);
+        final GameScore actualScore = ADVANTAGE;
+        Player federer = new Player(actualScore);
         Player nadal = new Player(POINT_40);
 
         // when
@@ -88,7 +96,21 @@ public class TenisGameRuleTest {
     @Test
     public void loosePoint_advantage_scoreBecomes40() {
         // given
-        Player federer = new Player(ADVANTAGE);
+        final GameScore actualScore = ADVANTAGE;
+        Player federer = new Player(actualScore);
+
+        // when
+        federer.loosePoint();
+
+        // then
+        assertThat(federer.getActualScore()).isEqualTo(POINT_40);
+    }
+
+    @Test
+    public void loosePoint_notAdvantage_scoreNotChanges() {
+        // given
+        final GameScore actualScore = POINT_40;
+        Player federer = new Player(actualScore);
 
         // when
         federer.loosePoint();
