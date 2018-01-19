@@ -6,14 +6,13 @@ public class Player {
 
     private GameScore currentGameScore;
 
-    private GameScore currentSetScore;
+    private int currentSetScore;
 
-    public Player() {
-        this.currentGameScore = POINT_0;
-    }
+    private int numberOfSetsWinned;
 
-    public Player(final GameScore score) {
-        this.currentGameScore = score;
+    private static int MAX_SETSCORE_VALUE = 7;
+
+    private Player() {
     }
 
     public void winGamePointAgainst(Player opponent) {
@@ -50,15 +49,78 @@ public class Player {
         }
     }
 
-    private void winSet(){
+    public void winGameAgainst(Player oppenent) {
+        if (currentSetScore < MAX_SETSCORE_VALUE) {
+            incrementCurrentSetScore();
+        }
 
+        if (isSetWinned(currentSetScore, oppenent.getCurrentSetScore())) {
+            incrementNumberOfSetsWinned();
+        }
+    }
+
+    private void incrementNumberOfSetsWinned() {
+        numberOfSetsWinned++;
+    }
+
+    private void incrementCurrentSetScore() {
+        currentSetScore++;
+    }
+
+    private boolean isSetWinned(int setScore, int setScoreOfOtherPlayer) {
+        return (setScore == MAX_SETSCORE_VALUE) || (setScore == 6 && setScoreOfOtherPlayer <= 4);
     }
 
     public GameScore getCurrentGameScore() {
         return currentGameScore;
     }
 
-    public GameScore getCurrentSetScore() {
+    public int getCurrentSetScore() {
         return currentSetScore;
+    }
+
+    private void getIncrementedSetScore() {
+        currentSetScore++;
+    }
+
+    public int getNumberOfSetsWinned() {
+        return numberOfSetsWinned;
+    }
+
+
+    public static final class PlayerBuilder {
+        private GameScore currentGameScore = POINT_0;
+        private int currentSetScore;
+        private int numberOfSetsWinned;
+
+        private PlayerBuilder() {
+        }
+
+        public static PlayerBuilder builder() {
+            return new PlayerBuilder();
+        }
+
+        public PlayerBuilder withCurrentGameScore(GameScore currentGameScore) {
+            this.currentGameScore = currentGameScore;
+            return this;
+        }
+
+        public PlayerBuilder withCurrentSetScore(int currentSetScore) {
+            this.currentSetScore = currentSetScore;
+            return this;
+        }
+
+        public PlayerBuilder withNumberOfSetsWinned(int numberOfSetsWinned) {
+            this.numberOfSetsWinned = numberOfSetsWinned;
+            return this;
+        }
+
+        public Player build() {
+            Player player = new Player();
+            player.numberOfSetsWinned = this.numberOfSetsWinned;
+            player.currentGameScore = this.currentGameScore;
+            player.currentSetScore = this.currentSetScore;
+            return player;
+        }
     }
 }

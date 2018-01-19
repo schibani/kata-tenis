@@ -1,18 +1,25 @@
 package com.schibani.katatenis;
 
+import com.schibani.katatenis.Player.PlayerBuilder;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static com.schibani.katatenis.GameScore.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TenisGameRuleTest {
 
+    private PlayerBuilder playerBuilder = PlayerBuilder.builder();
+
     @Test
     public void winGamePointAgainst_lastScoreIs0_scoreBecomes15() {
         // given
         final GameScore federerCurrentGameScore = POINT_0;
-        Player federer = new Player(federerCurrentGameScore);
-        Player nadal = new Player();
+        Player federer = playerBuilder.withCurrentGameScore(federerCurrentGameScore).build();
+        Player nadal = playerBuilder.build();
 
         // when
         federer.winGamePointAgainst(nadal);
@@ -25,8 +32,8 @@ public class TenisGameRuleTest {
     public void winGamePointAgainst_gameScoreIs15_scoreBecomes30() {
         // given
         final GameScore federerCurrentGameScore = POINT_15;
-        Player federer = new Player(federerCurrentGameScore);
-        Player nadal = new Player();
+        Player federer = playerBuilder.withCurrentGameScore(federerCurrentGameScore).build();
+        Player nadal = playerBuilder.build();
 
         // when
         federer.winGamePointAgainst(nadal);
@@ -39,8 +46,8 @@ public class TenisGameRuleTest {
     public void winGamePointAgainst_gameScoreIs30_gameScoreBecomes40() {
         // given
         final GameScore federerCurrentGameScore = POINT_30;
-        Player federer = new Player(federerCurrentGameScore);
-        Player nadal = new Player();
+        Player federer = playerBuilder.withCurrentGameScore(federerCurrentGameScore).build();
+        Player nadal = playerBuilder.build();
 
         // when
         federer.winGamePointAgainst(nadal);
@@ -54,8 +61,8 @@ public class TenisGameRuleTest {
         // given
         final GameScore federerCurrentGameScore = POINT_40;
         final GameScore nadalCurrentGameScore = POINT_30;
-        Player federer = new Player(federerCurrentGameScore);
-        Player nadal = new Player(nadalCurrentGameScore);
+        Player federer = playerBuilder.withCurrentGameScore(federerCurrentGameScore).build();
+        Player nadal = playerBuilder.withCurrentGameScore(nadalCurrentGameScore).build();
 
         // when
         federer.winGamePointAgainst(nadal);
@@ -69,8 +76,8 @@ public class TenisGameRuleTest {
         // given
         final GameScore federerCurrentGameScore = POINT_40;
         final GameScore nadalCurrentGameScore = POINT_40;
-        Player federer = new Player(federerCurrentGameScore);
-        Player nadal = new Player(nadalCurrentGameScore);
+        Player federer = playerBuilder.withCurrentGameScore(federerCurrentGameScore).build();
+        Player nadal = playerBuilder.withCurrentGameScore(nadalCurrentGameScore).build();
 
         // when
         federer.winGamePointAgainst(nadal);
@@ -83,8 +90,8 @@ public class TenisGameRuleTest {
     public void winGamePointAgainst_gameScoreIsAdvantage_gameWinned() {
         // given
         final GameScore currentScore = ADVANTAGE;
-        Player federer = new Player(currentScore);
-        Player nadal = new Player(POINT_40);
+        Player federer = playerBuilder.withCurrentGameScore(currentScore).build();
+        Player nadal = playerBuilder.withCurrentGameScore(POINT_40).build();
 
         // when
         federer.winGamePointAgainst(nadal);
@@ -97,7 +104,7 @@ public class TenisGameRuleTest {
     public void loosePoint_advantage_gameScoreBecomes40() {
         // given
         final GameScore actualScore = ADVANTAGE;
-        Player federer = new Player(actualScore);
+        Player federer = playerBuilder.withCurrentGameScore(actualScore).build();
 
         // when
         federer.loosePoint();
@@ -110,7 +117,7 @@ public class TenisGameRuleTest {
     public void loosePoint_gameScoreNotAdvantage_gameScoreNotChanges() {
         // given
         final GameScore currentScore = POINT_40;
-        Player federer = new Player(currentScore);
+        Player federer = playerBuilder.withCurrentGameScore(currentScore).build();
 
         // when
         federer.loosePoint();
@@ -120,21 +127,77 @@ public class TenisGameRuleTest {
     }
 
     @Test
-    public void winGameAgainst_gameScoreIs40_gameWinned1() {
+    public void winGameAgainst_setScoreBetween0And5_setScoreIncremented() {
         // given
+        final List<Integer> setScores = Arrays.asList(0, 1, 2, 3, 4);
+        final Player nadal = playerBuilder.build();
 
-        // when
+        setScores.forEach(currentSetScore -> {
+            final Player federer = playerBuilder.withCurrentSetScore(currentSetScore).build();
 
-        // then
+            // when
+            federer.winGameAgainst(nadal);
+
+            // then
+            assertThat(federer.getCurrentSetScore()).isEqualTo(currentSetScore + 1);
+        });
     }
 
     @Test
-    public void _winGamePointAgainst_gameScoreIs40_gameWinned1() {
+    public void winGameAgainst_setScoreIs5AndOtherPlayerScoreIsLessThan4_setWinned() {
         // given
+        final int federerSetScore = 5;
+        final List<Integer> nadalSetScores = Arrays.asList(0, 1, 2, 3, 4);
+        nadalSetScores.forEach(nadalCurrentSetScore -> {
+            final Player federer = playerBuilder.withCurrentSetScore(federerSetScore).build();
+            final Player nadal = playerBuilder.withCurrentSetScore(nadalCurrentSetScore).build();
+            // when
+            federer.winGameAgainst(nadal);
+
+            // then
+            assertThat(federer.getCurrentSetScore()).isEqualTo(6);
+            assertThat(federer.getNumberOfSetsWinned()).isEqualTo(1);
+        });
+    }
+
+    @Test
+    public void winGameAgainst_setScoreIs5AndOtherPlayerScoreIs5_setNotWinned() {
+        // given
+        final int federerSetScore = 5;
+        final int nadalSetScore = 5;
+        final int federerNumberOfSetsWinned = 2;
+        final Player federer = playerBuilder
+                .withCurrentSetScore(federerSetScore)
+                .withNumberOfSetsWinned(federerNumberOfSetsWinned)
+                .build();
+        final Player nadal = playerBuilder.withCurrentSetScore(nadalSetScore).build();
 
         // when
+        federer.winGameAgainst(nadal);
 
         // then
+        assertThat(federer.getCurrentSetScore()).isEqualTo(6);
+        assertThat(federer.getNumberOfSetsWinned()).isEqualTo(2);
+    }
+
+    @Test
+    public void winGameAgainst_setScoreIs6AndOtherPlayerScoreIs5_setWinned() {
+        // given
+        final int federerSetScore = 6;
+        final int nadalSetScore = 5;
+        final int federerNumberOfSetsWinned = 3;
+        final Player federer = playerBuilder
+                .withCurrentSetScore(federerSetScore)
+                .withNumberOfSetsWinned(federerNumberOfSetsWinned)
+                .build();
+        final Player nadal = playerBuilder.withCurrentSetScore(nadalSetScore).build();
+
+        // when
+        federer.winGameAgainst(nadal);
+
+        // then
+        assertThat(federer.getCurrentSetScore()).isEqualTo(7);
+        assertThat(federer.getNumberOfSetsWinned()).isEqualTo(4);
     }
 
 }
