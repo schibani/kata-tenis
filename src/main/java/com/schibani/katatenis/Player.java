@@ -4,55 +4,61 @@ import static com.schibani.katatenis.GameScore.*;
 
 public class Player {
 
-    private GameScore actualScore;
+    private GameScore currentGameScore;
+
+    private GameScore currentSetScore;
 
     public Player() {
-        this.actualScore = POINT_0;
+        this.currentGameScore = POINT_0;
     }
 
     public Player(final GameScore score) {
-        this.actualScore = score;
+        this.currentGameScore = score;
     }
 
-    public void winPointAgainst(Player opponent) {
-        switch (actualScore) {
+    public void winGamePointAgainst(Player opponent) {
+        switch (currentGameScore) {
             case POINT_0:
-                actualScore = POINT_15;
+                currentGameScore = POINT_15;
                 break;
             case POINT_15:
-                actualScore = POINT_30;
+                currentGameScore = POINT_30;
                 break;
             case POINT_30:
-                actualScore = POINT_40;
+                currentGameScore = POINT_40;
                 break;
             case POINT_40:
-                if (deuceIsActivated(opponent.getActualScore())) {
-                    actualScore = ADVANTAGE;
+                if (deuceIsActivated(opponent.getCurrentGameScore())) {
+                    currentGameScore = ADVANTAGE;
                 } else {
-                    actualScore = WIN;
+                    currentGameScore = WIN;
                 }
                 break;
             case ADVANTAGE:
-                actualScore = WIN;
+                currentGameScore = WIN;
                 break;
         }
     }
 
     private boolean deuceIsActivated(GameScore opponentScore) {
-        return this.actualScore == POINT_40 && opponentScore == POINT_40;
+        return this.currentGameScore == POINT_40 && opponentScore == POINT_40;
     }
 
     public void loosePoint() {
-        if (actualScore == ADVANTAGE) {
-            actualScore = POINT_40;
+        if (currentGameScore == ADVANTAGE) {
+            currentGameScore = POINT_40;
         }
     }
 
-    public GameScore getActualScore() {
-        return actualScore;
+    private void winSet(){
+
     }
 
-    public void setActualScore(GameScore actualScore) {
-        this.actualScore = actualScore;
+    public GameScore getCurrentGameScore() {
+        return currentGameScore;
+    }
+
+    public GameScore getCurrentSetScore() {
+        return currentSetScore;
     }
 }
