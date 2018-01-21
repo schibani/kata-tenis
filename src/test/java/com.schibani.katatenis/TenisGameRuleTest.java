@@ -1,7 +1,6 @@
 package com.schibani.katatenis;
 
 import com.schibani.katatenis.Player.PlayerBuilder;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -200,4 +199,112 @@ public class TenisGameRuleTest {
         assertThat(federer.getNumberOfSetsWinned()).isEqualTo(4);
     }
 
+    @Test
+    public void winGameAgainst_setScoreIs5AndOtherPlayerScoreIs6_tieBreakAnSetNotWinned() {
+        // given
+        final int federerSetScore = 5;
+        final int nadalSetScore = 6;
+        final int federerNumberOfSetsWinned = 2;
+        final Player federer = playerBuilder
+                .withCurrentSetScore(federerSetScore)
+                .withNumberOfSetsWinned(federerNumberOfSetsWinned)
+                .build();
+        final Player nadal = playerBuilder.withCurrentSetScore(nadalSetScore).build();
+
+        // when
+        federer.winGameAgainst(nadal);
+
+        // then
+        assertThat(federer.getCurrentSetScore()).isEqualTo(6);
+        assertThat(federer.getNumberOfSetsWinned()).isEqualTo(2);
+    }
+
+    @Test
+    public void winGameAgainst_setScoreIs6AndOtherPlayerScoreIs6_tieBreakIncrementedAndMatchNotYetWinned() {
+        // given
+        final int federerSetScore = 6;
+        final int nadalSetScore = 6;
+        final int federerNumberOfSetsWinned = 2;
+        final Player federer = playerBuilder
+                .withCurrentSetScore(federerSetScore)
+                .withNumberOfSetsWinned(federerNumberOfSetsWinned)
+                .withCurrentTieBreakScore(0)
+                .build();
+        final Player nadal = playerBuilder.withCurrentSetScore(nadalSetScore).build();
+
+        // when
+        federer.winGameAgainst(nadal);
+
+        // then
+        assertThat(federer.getCurrentSetScore()).isEqualTo(6);
+        assertThat(federer.getNumberOfSetsWinned()).isEqualTo(2);
+        assertThat(federer.getCurrentTieBreakScore()).isEqualTo(1);
+        assertThat(federer.isMatchWinned()).isFalse();
+    }
+
+    @Test
+    public void winGameAgainst_tieBreakScoreMinNotReached_tieBreakIncrementedAndMatchNotYetWinned() {
+        // given
+        final int federerTieBreakScore = 4;
+        final int nadalTieBreakScore = 1;
+        final Player federer = playerBuilder
+                .withCurrentSetScore(6)
+                .withCurrentTieBreakScore(federerTieBreakScore)
+                .build();
+        final Player nadal = playerBuilder
+                .withCurrentSetScore(6)
+                .withCurrentTieBreakScore(nadalTieBreakScore)
+                .build();
+
+        // when
+        federer.winGameAgainst(nadal);
+
+        // then
+        assertThat(federer.getCurrentTieBreakScore()).isEqualTo(5);
+        assertThat(federer.isMatchWinned()).isFalse();
+    }
+
+    @Test
+    public void winGameAgainst_tieBreakScoreMinReachedButDiffScoreNotReached_tieBreakIncrementedAndMatchNotYetWinned() {
+        // given
+        final int federerTieBreakScore = 5;
+        final int nadalTieBreakScore = 5;
+        final Player federer = playerBuilder
+                .withCurrentSetScore(6)
+                .withCurrentTieBreakScore(federerTieBreakScore)
+                .build();
+        final Player nadal = playerBuilder
+                .withCurrentSetScore(6)
+                .withCurrentTieBreakScore(nadalTieBreakScore)
+                .build();
+
+        // when
+        federer.winGameAgainst(nadal);
+
+        // then
+        assertThat(federer.getCurrentTieBreakScore()).isEqualTo(6);
+        assertThat(federer.isMatchWinned()).isFalse();
+    }
+
+    @Test
+    public void winGameAgainst_tieBreakScoreRulleFullfiled_matchWinned() {
+        // given
+        final int federerTieBreakScore = 6;
+        final int nadalTieBreakScore = 5;
+        final Player federer = playerBuilder
+                .withCurrentSetScore(6)
+                .withCurrentTieBreakScore(federerTieBreakScore)
+                .build();
+        final Player nadal = playerBuilder
+                .withCurrentSetScore(6)
+                .withCurrentTieBreakScore(nadalTieBreakScore)
+                .build();
+
+        // when
+        federer.winGameAgainst(nadal);
+
+        // then
+        assertThat(federer.getCurrentTieBreakScore()).isEqualTo(7);
+        assertThat(federer.isMatchWinned()).isTrue();
+    }
 }

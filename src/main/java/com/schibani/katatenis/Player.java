@@ -4,13 +4,21 @@ import static com.schibani.katatenis.GameScore.*;
 
 public class Player {
 
+    private final int TIE_BREAK_DIFF_MIN_SCORE = 2;
+
+    private static final int WINING_SET_SCORE = 6;
+
+    private static int EXTENDED_WINING_SET_SCORE = 7;
+
     private GameScore currentGameScore;
 
     private int currentSetScore;
 
     private int numberOfSetsWinned;
 
-    private static int MAX_SETSCORE_VALUE = 7;
+    private int currentTieBreakScore;
+
+    private boolean matchWinned;
 
     private Player() {
     }
@@ -50,13 +58,47 @@ public class Player {
     }
 
     public void winGameAgainst(Player oppenent) {
-        if (currentSetScore < MAX_SETSCORE_VALUE) {
+        if (tieBreakActivated(currentSetScore, oppenent.getCurrentSetScore())) {
+            winTieBreakGame(oppenent);
+        } else {
+            winSimpleGame(oppenent);
+        }
+    }
+
+    private void winSimpleGame(Player oppenent) {
+        if (currentSetScore < EXTENDED_WINING_SET_SCORE) {
             incrementCurrentSetScore();
         }
 
         if (isSetWinned(currentSetScore, oppenent.getCurrentSetScore())) {
             incrementNumberOfSetsWinned();
         }
+    }
+
+    private void winTieBreakGame(Player oppenent) {
+        if (!matchWinned) {
+            incrementCurrentTieBreakScore();
+            if (isTieBreakRuleFullfiled(oppenent)) {
+                matchWinned = true;
+            }
+        }
+    }
+
+    private boolean isTieBreakRuleFullfiled(Player oppenent) {
+        return isMinimumTieBreakScoreReached()
+                && isTieBreakScoreDifferenceBetweenPlayersReached(oppenent);
+    }
+
+    private boolean isTieBreakScoreDifferenceBetweenPlayersReached(Player oppenent) {
+        return currentTieBreakScore - oppenent.getCurrentTieBreakScore() == TIE_BREAK_DIFF_MIN_SCORE;
+    }
+
+    private boolean isMinimumTieBreakScoreReached() {
+        return currentTieBreakScore >= WINING_SET_SCORE;
+    }
+
+    private boolean tieBreakActivated(int currentSetScore, int otherPlayerCurrentSetScore) {
+        return currentSetScore == WINING_SET_SCORE && otherPlayerCurrentSetScore == WINING_SET_SCORE;
     }
 
     private void incrementNumberOfSetsWinned() {
@@ -67,8 +109,13 @@ public class Player {
         currentSetScore++;
     }
 
+    private void incrementCurrentTieBreakScore() {
+        currentTieBreakScore++;
+    }
+
     private boolean isSetWinned(int setScore, int setScoreOfOtherPlayer) {
-        return (setScore == MAX_SETSCORE_VALUE) || (setScore == 6 && setScoreOfOtherPlayer <= 4);
+        return (setScore == EXTENDED_WINING_SET_SCORE)
+                || (setScore == WINING_SET_SCORE && setScoreOfOtherPlayer <= 4);
     }
 
     public GameScore getCurrentGameScore() {
@@ -79,19 +126,23 @@ public class Player {
         return currentSetScore;
     }
 
-    private void getIncrementedSetScore() {
-        currentSetScore++;
-    }
-
     public int getNumberOfSetsWinned() {
         return numberOfSetsWinned;
     }
 
+    public int getCurrentTieBreakScore() {
+        return currentTieBreakScore;
+    }
+
+    public boolean isMatchWinned() {
+        return matchWinned;
+    }
 
     public static final class PlayerBuilder {
         private GameScore currentGameScore = POINT_0;
         private int currentSetScore;
         private int numberOfSetsWinned;
+        private int currentTieBreakScore;
 
         private PlayerBuilder() {
         }
@@ -115,11 +166,17 @@ public class Player {
             return this;
         }
 
+        public PlayerBuilder withCurrentTieBreakScore(int currentTieBreakScore) {
+            this.currentTieBreakScore = currentTieBreakScore;
+            return this;
+        }
+
         public Player build() {
             Player player = new Player();
             player.numberOfSetsWinned = this.numberOfSetsWinned;
             player.currentGameScore = this.currentGameScore;
             player.currentSetScore = this.currentSetScore;
+            player.currentTieBreakScore = this.currentTieBreakScore;
             return player;
         }
     }
